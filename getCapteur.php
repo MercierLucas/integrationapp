@@ -6,7 +6,7 @@
         die();
     }
     
-    function getCapteur($bdd,$id,$type){
+    function getCapteurAJAX($bdd,$id,$type){
         $query='select * from capteur join record on capteur.idCapteur=record.idCapteur where capteur.nCapteur='.$id.' and type="'.$type.'"';
         //echo $query;
         $ans=$bdd->query($query);
@@ -15,6 +15,6 @@
         //return $donnees;
     }
 
-    getCapteur($bdd,$_POST['id'],$_POST['type']);
+    getCapteurAJAX($bdd,$_POST['id'],$_POST['type']);
 
 ?>

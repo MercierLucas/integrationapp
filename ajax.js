@@ -27,6 +27,25 @@ var getHttpRequest= function(){
 }
 
 
+function getData(){
+  console.log('Data status: Collecting...');
+  var httpRequest=getHttpRequest();
+  httpRequest.open('POST','./getDataFromServer.php',true);
+  httpRequest.send();
+  httpRequest.onreadystatechange=function(){
+    if(httpRequest.readyState===4){
+      document.getElementById('servTable').innerHTML="";
+      //console.log("SERVER: "+httpRequest.responseText);
+      obj=JSON.parse(httpRequest.responseText);
+      console.log("SERVER: "+obj[0]);
+      for (let i = 0; i < obj.length; i++) {
+        $('#servTable').append(obj[i]);      
+      }
+      console.log('Data status: Done.');
+    }
+  }
+}
+
 function listNumCapteur(){
     var type=$('#typeCapteur').val();
     var httpRequest=getHttpRequest();
@@ -90,8 +109,7 @@ function update(){
     httpRequest.onreadystatechange=function(){
       if(httpRequest.readyState===4){
         //console.log(httpRequest.responseText);
-        obj=JSON.parse(httpRequest.responseText);
-        console.log("OBJ "+obj);   
+        obj=JSON.parse(httpRequest.responseText); 
         setTimeout(function(){ 
             updateGraph(obj,type);
             loading(false)},1000);
@@ -100,12 +118,10 @@ function update(){
   }
 
   $(document).on('change','#nCapteur',function(e) {
-      console.log('TA GUEULE');
       update();
   });
 
   $(document).on('change','#typeCapteur',function(e) {
-    console.log('TA GUEULE');
     listNumCapteur();
     update();
 });
@@ -114,6 +130,7 @@ function update(){
     update();
     listNumCapteur();
     listTypeCapteur();
+    setInterval(getData,6000);
 }); 
 
 function updateGraph(obj,titre){
