@@ -35,12 +35,12 @@ function getData(){
   httpRequest.onreadystatechange=function(){
     if(httpRequest.readyState===4){
       document.getElementById('servTable').innerHTML="";
-      //console.log("SERVER: "+httpRequest.responseText);
-      obj=JSON.parse(httpRequest.responseText);
+      console.log("SERVER: "+httpRequest.responseText);
+/*       obj=JSON.parse(httpRequest.responseText);
       console.log("SERVER: "+obj[0]);
       for (let i = 0; i < obj.length; i++) {
         $('#servTable').append(obj[i]);      
-      }
+      } */
       console.log('Data status: Done.');
     }
   }
@@ -105,15 +105,17 @@ function update(){
     data.append('id',id);
     data.append('type',type);
     httpRequest.send(data);
-    loading(true);
+    //loading(true);
     httpRequest.onreadystatechange=function(){
       if(httpRequest.readyState===4){
         //console.log(httpRequest.responseText);
-        obj=JSON.parse(httpRequest.responseText); 
-        setTimeout(function(){ 
+        obj=JSON.parse(httpRequest.responseText);
+        console.log("OBJ "+obj);
+        updateGraph(obj,type); 
+/*          setTimeout(function(){ 
             updateGraph(obj,type);
-            loading(false)},1000);
-      }
+            loading(false)},1000); */
+      } 
     }
   }
 
@@ -130,7 +132,7 @@ function update(){
     update();
     listNumCapteur();
     listTypeCapteur();
-    setInterval(getData,6000);
+    setInterval(function(){getData();update();},6000);
 }); 
 
 function updateGraph(obj,titre){
@@ -233,9 +235,9 @@ function updateGraph(obj,titre){
 
     ctx.beginPath();
     for (var i=0;i<obj.length;i++) {
-        var h = obj[i].valeur;
+        var h = obj[i].valeur/2;
         var y = canvas.height - h*10;
-        console.log(y);
+        console.log(h);
         //Lines
         ctx.strokeStyle = '#118ab2';
         ctx.lineWidth = 2;

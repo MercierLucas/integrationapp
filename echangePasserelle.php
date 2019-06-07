@@ -15,6 +15,13 @@
         return $donnees;
     }
 
+    function getRecords($bdd,$idCapteur){
+        $query='select * from record where record.idCapteur='.$idCapteur;
+        $ans=$bdd->query($query);
+        $donnees = $ans->fetchall();
+        //echo json_encode($donnees);
+        return $donnees;
+    }
     function getLastInsertId($bdd){
         $query='select LAST_INSERT_ID();';      // récupère le dernier id créé
         $ans=$bdd->query($query);
@@ -56,14 +63,23 @@
         // s'ils existent déjà met à jour les valeurs
         }else{
             $capteur= getCapteur($bdd,$nCapteur,$type);
+            $records= getRecords($bdd, $capteur[0]['idCapteur']);
+
             for ($i=1; $i < 10 ; $i++) { 
-                $sql='update `record` SET `nRecord`='.($i+1).' WHERE idCapteur='.$capteur[0]['idCapteur'].' and nCapteur='.$i;
-                //echo "update_".$i." ".$sql;
-                $ans=$bdd->query($sql);
+                $sql='update `record` SET `valeur`='.$records[$i-1]['valeur'].' WHERE idCapteur='.$capteur[0]['idCapteur'].' and nRecord='.$i;
+                $stmt=$bdd->prepare($sql);
+                if(!$stmt->execute()){
+                    echo "ERREUR AVEC: ".$sql."</br>";
+                    return;
+                }
             }
-            $sql='update `record` SET `valeur`='.$value.' WHERE idCapteur='.$capteur[0]['idCapteur'].' and nCapteur=0';
-            //echo "update_0: ".$sql;
-            $ans=$bdd->query($sql);
+            $sql='update `record` SET `valeur`='.(float)$value.' WHERE idCapteur='.$capteur[0]['idCapteur'].' and nRecord=0';
+            
+            $stmt=$bdd->prepare($sql);
+            if(!$stmt->execute()){
+                echo "update_0: ".$sql."</br>";
+                return;
+            }
         }
     }
 
