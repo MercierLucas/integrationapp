@@ -35,17 +35,54 @@ function getData(){
   httpRequest.onreadystatechange=function(){
     if(httpRequest.readyState===4){
       document.getElementById('servTable').innerHTML="";
-      console.log("SERVER: "+httpRequest.responseText);
-/*       obj=JSON.parse(httpRequest.responseText);
-      console.log("SERVER: "+obj[0]);
+      // console.log("SERVER: "+httpRequest.responseText);
+      obj=JSON.parse(httpRequest.responseText);
+      //$('#servTable').append(obj[0]);
+      //console.log("SERVER: "+obj[0]);
       for (let i = 0; i < obj.length; i++) {
-        $('#servTable').append(obj[i]);      
-      } */
-      console.log('Data status: Done.');
+        $('#servTable').append(obj[i]); 
+        console.log('obj_'+i+ ' '+obj[i]);     
+      }
+      console.log('Data status: Done.'); 
     }
   }
 }
 
+function sendQuerry(type,src){
+  var httpRequest=getHttpRequest();
+  // 1 009D 1 3 01 002B 0125 1B
+  var value=$('#'+src).val();
+  switch(value.length){
+    case 0:
+      value='0000';
+      break;
+    case 1:
+      value='000'+value;
+      break;
+    case 2:
+      value='00'+value;
+      break;
+    case 3:
+      value='0'+value;
+      break;
+    case 4:
+        break;
+    default:
+      value="0000";
+      break;
+  }
+  var trame='1009D2'+type+'01'+value+'01251B';
+  //var core=
+
+  var url="http://projets-tomcat.isep.fr:8080/appService/?ACTION=COMMAND&TEAM=009d&TRAME="+trame;
+  httpRequest.open('GET',url,true);
+  httpRequest.send();
+  httpRequest.onreadystatechange=function(){
+    if(httpRequest.readyState===4){
+      console.log(trame);
+    }
+  }
+}
 function listNumCapteur(){
     var type=$('#typeCapteur').val();
     var httpRequest=getHttpRequest();
@@ -110,8 +147,11 @@ function update(){
       if(httpRequest.readyState===4){
         //console.log(httpRequest.responseText);
         obj=JSON.parse(httpRequest.responseText);
-        console.log("OBJ "+obj);
-        updateGraph(obj,type); 
+        for (let i = 0; i < obj.length; i++) {
+          console.log('obj_'+i+ ' '+obj[i].valeur+' '+obj[i].type);     
+        }
+        chartjs(obj);
+        //updateGraph(obj,type); 
 /*          setTimeout(function(){ 
             updateGraph(obj,type);
             loading(false)},1000); */
@@ -121,6 +161,11 @@ function update(){
 
   $(document).on('change','#nCapteur',function(e) {
       update();
+  });
+
+  $('#temperature').click(function(e){
+    e.preventDefault();
+    sendQuerry(3,'tempvalue');
   });
 
   $(document).on('change','#typeCapteur',function(e) {
@@ -135,10 +180,53 @@ function update(){
     setInterval(function(){getData();update();},6000);
 }); 
 
+
+function chartjs(obj){
+  var ctx = document.getElementById('myChart').getContext('2d');
+  var label=[];
+  var data=[];
+  for (let i = 0; i < obj.length; i++) {
+    label.push(i);
+    data.push(obj[obj.length-i-1].valeur);
+  }
+  var chart = new Chart(ctx, {
+      // The type of chart we want to create
+      type: 'line',
+      
+      // The data for our dataset
+      data: {
+          labels: label,
+          datasets: [{
+              label: 'My First dataset',
+              fill:false,
+              backgroundColor: 'rgb(255, 99, 132)',
+              borderColor: 'rgb(255, 99, 132)',
+              data: data
+          }]
+      },
+
+      // Configuration options go here
+      options: {
+        maintainAspectRatio: false,
+        responsive: false,
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        },
+        animation: {
+          duration: 0
+        }
+      }
+  });
+}
 function updateGraph(obj,titre){
     var canvas = document.getElementById('myCanvas');
     var ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);   // reset canvas
+    
     
     var yTitle =titre;
 
@@ -187,7 +275,6 @@ function updateGraph(obj,titre){
         ctx.stroke();
     }
 
-
     // axe des ordonnes
     // Draw grid lines along Y-axis
     for(i=0; i<=num_lines_y; i++) {
@@ -235,16 +322,17 @@ function updateGraph(obj,titre){
 
     ctx.beginPath();
     for (var i=0;i<obj.length;i++) {
-        var h = obj[i].valeur/2;
+        var h = parseFloat(obj[obj.length-i-1].valeur);
         var y = canvas.height - h*10;
-        console.log(h);
+        console.log('i:'+i+' v:'+h);
         //Lines
-        ctx.strokeStyle = '#118ab2';
+        ctx.strokeStyle = '#ff7a99';
         ctx.lineWidth = 2;
         if (i == 0) {
             ctx.moveTo(currX + width /2, y);
         }
         else {
+            ctx.fillText(h.toFixed(2), currX + width /2, y-10);
             ctx.lineTo(currX + width /2, y);
         }
         

@@ -1,5 +1,6 @@
-<?php
-    try {
+<?php 
+
+try {
         $bdd = new PDO('mysql:host=localhost;dbname=integration', 'root', '');
     } catch (PDOException $e) {
         print "Erreur !: " . $e->getMessage() . "<br/>";
@@ -26,7 +27,9 @@
 
     $data_tab = str_split($data,33);
     $dic = array(1 => "Distance",3 => "Temperature", 4 => "Humidite",5 => "Luminosite");
+    
     for ($i=0; $i < 3; $i++) { 
+        
         $trame = $data_tab[sizeof($data_tab)-(2+$i)];     
         $t = substr($trame,0,1); //1
         $o = substr($trame,1,4); //4
@@ -47,9 +50,10 @@
         $hour = substr($trame,27,2); //2
         $min = substr($trame,29,2); //2
         $sec = substr($trame,31,2); //2
-        create_entry($bdd,$n,$dic[$c],$v);
+        //create_entry($bdd,$n,$dic[$c],$v);
         $res[$i]="<tr><th>".$dic[$c]."</th><th>".$n."</th><th>".$v."</th><th>".$day."/".$month."/".$year." - ".$hour.":".$min.":".$sec."</th></tr>";
     }
-    echo json_encode($res);
-
-?>
+    for ($i=0; $i < sizeOf($res); $i++) { 
+        echo $res[$i].'</br>';
+    }
+    //echo json_encode($res);

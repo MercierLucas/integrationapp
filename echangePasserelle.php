@@ -65,8 +65,10 @@
             $capteur= getCapteur($bdd,$nCapteur,$type);
             $records= getRecords($bdd, $capteur[0]['idCapteur']);
 
-            for ($i=1; $i < 10 ; $i++) { 
-                $sql='update `record` SET `valeur`='.$records[$i-1]['valeur'].' WHERE idCapteur='.$capteur[0]['idCapteur'].' and nRecord='.$i;
+            for ($i=0; $i < 9 ; $i++) {
+                //$sql='update `buffer` SET `valeur`='.$records[$i]['valeur'].' WHERE nCapteur='.($i+2);
+                //  $sql='update `record` SET `valeur`='.$records[$i]['valeur'].' WHERE idCapteur=2 and nRecord='.($i+1);
+                $sql='update `record` SET `valeur`='.$records[$i]['valeur'].' WHERE idCapteur='.$capteur[0]['idCapteur'].' and nRecord='.($i+1);
                 $stmt=$bdd->prepare($sql);
                 if(!$stmt->execute()){
                     echo "ERREUR AVEC: ".$sql."</br>";
