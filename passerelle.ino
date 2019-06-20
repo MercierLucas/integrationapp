@@ -31,7 +31,7 @@ char  TrameEnvoi[20];                   // buffer pour envoyer  une trame vers l
 char  TrameRecep[20];                   // buffer pour recevoir une trame venant de la passerelle
 char  TrameFinale[14];
 char  CheckSum;
-int  i,disp;
+int  i,disp,moteur,lumi;
 String  valcaptrecep,typecaptrecep;
 
 void setup()
@@ -94,7 +94,8 @@ void loop()
   //Wait_CleSonore(); 
 
   while (1) {
-    if(time>=595){
+    
+    if(time>=300){
       
       // lire ici le capteur 1 et mettre la valeur dans la variable valcapt
       valcapt = analogRead(ValDist);
@@ -115,7 +116,10 @@ void loop()
       valcapt = analogRead(ValLum);
       typeCapt = 0x35;  // mettre le code correspondant au capteur 3
       Envoi_Trame(valcapt, typeCapt);
-                
+      
+      Envoi_Trame(moteur, 0x36);
+      Envoi_Trame(lumi, 0x38);
+      
       time=0;
       
       Smin = "40";
@@ -135,11 +139,11 @@ void loop()
       delay(50);               // wait for a second
       analogWrite(LED, 0);    // turn the LED off by making the voltage LOW
       */ 
-      time=0;
     }
+    
     Recep_Trame();
                   
-    if(disp==1) //&& TrameFinale[13]=='0' && TrameFinale[14]=='1'
+    if(disp==1 && TrameFinale[13]=='0' && TrameFinale[14]=='1')
     {
       typecaptrecep = "";
       typecaptrecep = typecaptrecep + TrameFinale[6];
@@ -158,11 +162,13 @@ void loop()
           Serial.println("Démarrage du moteur");
           digitalWrite(T1,HIGH);
           digitalWrite(T2,LOW);
+          moteur = 1;
         }
         if(valcaptrecep == "0000"){
           Serial.println("Arrêt du moteur");
           digitalWrite(T1,LOW);
           digitalWrite(T2,LOW);
+          moteur = 0;
         }
       }
       
@@ -187,14 +193,14 @@ void loop()
         if(valcaptrecep == "0001"){
           Serial.println("LED on");
           analogWrite(LED, 10);
+          lumi = 1;
         }
         if(valcaptrecep == "0000"){
           Serial.println("LED off");
           analogWrite(LED, 0);
+          lumi = 0;
         }
       }
-      
-      
       
       Serial.println(typecaptrecep);
       Serial.println(valcaptrecep);
